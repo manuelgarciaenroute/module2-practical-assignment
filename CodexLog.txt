@@ -1,0 +1,33 @@
+Codex Log
+=========
+
+Entry 1
+Date: 2026-04-21
+Prompt: "I want you to create a file called CodexLog.txt in the root of this repository to this file you will add all of the prompts I tell you and give an explanation of what was done as a result of the prompt"
+Result: Created `CodexLog.txt` in the repository root and initialized it with this first log entry. Going forward, each new prompt you send will be appended with a brief explanation of actions taken.
+
+Entry 2
+Date: 2026-04-21
+Prompt: "I want you to create a small coding project in python 3.14.4, this project should have multiple files and functions, I want it to simulate a cientific calculator using the console, and it has to contain operations for sum, division, multiplication, logarithm, exponentials, substraction, and should interact via console with an user that will be asked the operation that should be performed and the required paramaters that take part in that operation."
+Result: Created a multi-file Python console project for a scientific calculator. Added separate modules for operations (`add`, `subtract`, `multiply`, `divide`, `logarithm`, `exponential`), UI input helpers, and application flow with an interactive menu that asks the user for operation and parameters. Added `main.py` as the entry point. Attempted to run a smoke test, but Python launchers were not accessible in this environment, so runtime verification could not be completed here.
+
+Entry 3
+Date: 2026-04-21
+Prompt: "I want you to create a folder in the root of the project that is called tests, this folder should contain a meaningful test for the scientific calculator project and they should fail if the application is intentionally broken"
+Result: Created a `tests` folder in the repository root with meaningful unit tests for both calculation logic and console flow. Added `tests/test_operations.py` to validate arithmetic/logarithm/exponential behavior and error cases, and `tests/test_app_flow.py` to validate interactive app behavior using mocked user input/output (including division-by-zero error display). These tests are designed to fail when core functionality is intentionally broken. Attempted to execute the test suite, but Python launcher access is unavailable in this environment.
+
+Entry 4
+Date: 2026-04-21
+Prompt: "I want you to summarize the current project including functionality and tests in a file and call it README.md"
+Result: Created `README.md` in the project root with a full summary of the current calculator project, including supported functionality, input/error handling behavior, project file structure, run instructions, test command, and a breakdown of what each test file validates. Also documented that the tests are designed to catch regressions when functionality is intentionally broken.
+
+Entry 5
+Date: 2026-04-21
+Prompt: "3. Add a CI workflow
+Create a GitHub Actions workflow that:
+
+runs on pull requests
+installs dependencies
+runs the test suite
+This workflow should fail when the project is broken and pass after the fix is applied."
+Result: Added GitHub Actions workflow at `.github/workflows/ci.yml`. The workflow triggers on pull requests, checks out the code, sets up Python 3.13, installs dependencies (upgrades pip and installs from `requirements.txt` when present), and runs the test suite with `python -m unittest discover -s tests -p "test_*.py"`. Since the tests validate core behavior, CI will fail when functionality is broken and pass when fixed.
