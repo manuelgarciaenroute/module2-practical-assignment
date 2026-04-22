@@ -63,7 +63,7 @@ powershell -ExecutionPolicy Bypass -File .\codex_repair_flow.ps1 -MaxRetries 3
 
 The auto-fix workflow is:
 
-- `.github/workflows/codex-auto-repair.yml`
+- `.github/workflows/codex-autofix.yml`
 
 How it runs:
 1. Open or update a pull request with failing code.
@@ -79,7 +79,7 @@ Notes:
 
 The grading workflow is:
 
-- `.github/workflows/pr-grading.yml`
+- `.github/workflows/grade.yml`
 
 It runs on PR open/synchronize/reopen and comments a score out of 100 based on:
 - tests pass (`+50`)

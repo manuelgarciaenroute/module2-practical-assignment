@@ -80,3 +80,13 @@ how to run the GitHub Actions auto-fix workflow
 how the grading workflow works
 any required repository secrets"
 Result: Updated `README.md` to include dedicated sections for prerequisites, local setup, local test execution, creating a failing scenario, running the local repair flow (`codex_repair_flow.ps1`), running the GitHub Actions auto-fix flow (`ci.yml` + `codex-auto-repair.yml`), grading workflow behavior (`pr-grading.yml` scoring logic), and required repository secret configuration (`OPENAI_API_KEY`) plus write-permission requirements for workflow commits.
+
+Entry 11
+Date: 2026-04-21
+Prompt: "Rename the file codex-auto-repair.yml to codex-autofix.yml"
+Result: Renamed workflow file from `.github/workflows/codex-auto-repair.yml` to `.github/workflows/codex-autofix.yml` and updated `README.md` to reference the new filename.
+
+Entry 12
+Date: 2026-04-21
+Prompt: "Rename the file pr-grading.yml to grade.yml"
+Result: Renamed workflow file from `.github/workflows/pr-grading.yml` to `.github/workflows/grade.yml` and updated `README.md` to reference the new filename.
