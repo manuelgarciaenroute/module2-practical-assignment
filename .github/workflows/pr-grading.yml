@@ -1,0 +1,117 @@
+name: PR Grading
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run test suite
+        id: tests
+        continue-on-error: true
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Grade and comment on PR
+        uses: actions/github-script@v7
+        env:
+          TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          PR_ADDITIONS: ${{ github.event.pull_request.additions }}
+          PR_DELETIONS: ${{ github.event.pull_request.deletions }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pull_number = Number(process.env.PR_NUMBER);
+
+            const testsPassed = process.env.TESTS_OUTCOME === "success";
+            const additions = Number(process.env.PR_ADDITIONS || "0");
+            const deletions = Number(process.env.PR_DELETIONS || "0");
+            const totalChangedLines = additions + deletions;
+
+            const restrictedPrefixes = [
+              "tests/",
+              ".github/workflows/",
+              ".github/prompts/",
+              "CodexLog.txt",
+            ];
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100,
+            });
+
+            const restrictedModified = files.some((f) =>
+              restrictedPrefixes.some((prefix) => f.filename.startsWith(prefix))
+            );
+
+            const diffIsSmall = totalChangedLines <= 300;
+
+            let score = 0;
+            if (testsPassed) score += 50;
+            if (!restrictedModified) score += 25;
+            if (diffIsSmall) score += 25;
+
+            const statusEmoji = score >= 80 ? "✅" : score >= 50 ? "⚠️" : "❌";
+            const body = [
+              "## Automated PR Grade",
+              `${statusEmoji} **Score: ${score}/100**`,
+              "",
+              `- Tests pass: ${testsPassed ? "Yes (+50)" : "No (+0)"}`,
+              `- Restricted files modified: ${restrictedModified ? "Yes (+0)" : "No (+25)"}`,
+              `- Diff size (<= 300 changed lines): ${diffIsSmall ? `Yes (+25) [${totalChangedLines} lines]` : `No (+0) [${totalChangedLines} lines]`}`,
+              "",
+              "_Restricted file paths: `tests/`, `.github/workflows/`, `.github/prompts/`, `CodexLog.txt`._",
+            ].join("\n");
+
+            const marker = "<!-- codex-pr-grade -->";
+            const fullBody = `${marker}\n${body}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: pull_number,
+              per_page: 100,
+            });
+
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: fullBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pull_number,
+                body: fullBody,
+              });
+            }
+

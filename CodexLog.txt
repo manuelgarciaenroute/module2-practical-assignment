@@ -31,3 +31,52 @@ installs dependencies
 runs the test suite
 This workflow should fail when the project is broken and pass after the fix is applied."
 Result: Added GitHub Actions workflow at `.github/workflows/ci.yml`. The workflow triggers on pull requests, checks out the code, sets up Python 3.13, installs dependencies (upgrades pip and installs from `requirements.txt` when present), and runs the test suite with `python -m unittest discover -s tests -p "test_*.py"`. Since the tests validate core behavior, CI will fail when functionality is broken and pass when fixed.
+
+Entry 6
+Date: 2026-04-21
+Prompt: "I want you to change one of the functions of the project so that one of the test cases in test_operations.py file fails"
+Result: Intentionally modified `subtract(a, b)` in `scientific_calculator/operations.py` to return `a + b` instead of `a - b`. This change is expected to make `test_subtract` in `tests/test_operations.py` fail.
+
+Entry 7
+Date: 2026-04-21
+Prompt: "4. Add a local Codex repair flow
+Create a local workflow that demonstrates how Codex can inspect failures and repair the project.
+
+Your local repair flow should do the following:
+
+run the tests
+read the failures
+diagnose the root cause
+patch only the application code
+re-run the tests until they pass or a retry limit is reached
+You may implement this through a script, a prompt file, or another repeatable local workflow."
+Result: Added a repeatable local repair workflow using `codex_repair_flow.ps1` plus usage documentation in `LOCAL_REPAIR_FLOW.md`. The script runs tests, inspects failure output, diagnoses a known failure (`test_subtract`), patches only `scientific_calculator/operations.py`, and retries until tests pass or the retry limit is reached. Attempted to execute the workflow in this environment, but no working Python runner (`python` or `py -3`) is accessible here.
+
+Entry 8
+Date: 2026-04-21
+Prompt: "Create a workflow. It should: run after a branch contains failing code execute the test suite invoke Codex non-interactively attempt a repair commit the patch back to the same branch re-run validation If your workflow requires authentication, document the required secret configuration in your README.md."
+Result: Added `.github/workflows/codex-auto-repair.yml`, triggered by `workflow_run` after the `CI` workflow completes with failure on pull-request branches from the same repository. The workflow checks out the failing branch, installs dependencies, runs tests and captures failures, invokes Codex non-interactively via `openai/codex-action@v1`, attempts a repair, commits/pushes any generated patch back to the same branch, and re-runs validation tests. Added `.github/prompts/codex-repair.prompt.md` for repeatable repair instructions. Updated `README.md` with CI/auto-repair workflow documentation and required `OPENAI_API_KEY` secret plus write-permission note for pushing repair commits.
+
+Entry 9
+Date: 2026-04-21
+Prompt: "Add an automatic grading workflow
+Create a workflow that comments a simple score on the pull request.
+
+Your grading logic should consider items such as:
+
+whether tests pass
+whether restricted files were modified
+whether the resulting diff stays reasonably small"
+Result: Added `.github/workflows/pr-grading.yml` to automatically grade pull requests. The workflow triggers on PR open/synchronize/reopen, runs the test suite, evaluates whether restricted files were modified (`tests/`, `.github/workflows/`, `.github/prompts/`, `CodexLog.txt`), checks whether total changed lines are reasonably small (<= 300), computes a score out of 100, and posts/updates a PR comment with the grading breakdown.
+
+Entry 10
+Date: 2026-04-21
+Prompt: "Edit the README.md file so that it explains the following points prerequisites
+local setup
+how to run tests locally
+how to create a failing scenario
+how to run the local repair workflow
+how to run the GitHub Actions auto-fix workflow
+how the grading workflow works
+any required repository secrets"
+Result: Updated `README.md` to include dedicated sections for prerequisites, local setup, local test execution, creating a failing scenario, running the local repair flow (`codex_repair_flow.ps1`), running the GitHub Actions auto-fix flow (`ci.yml` + `codex-auto-repair.yml`), grading workflow behavior (`pr-grading.yml` scoring logic), and required repository secret configuration (`OPENAI_API_KEY`) plus write-permission requirements for workflow commits.
