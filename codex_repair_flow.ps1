@@ -4,6 +4,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$PSNativeCommandUseErrorActionPreference = $false
 
 function Resolve-PythonRunner {
     $candidates = @(
@@ -37,7 +38,15 @@ function Invoke-TestSuite {
     }
     $args += @("-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py")
 
-    $output = & $PythonPrefix[0] @args 2>&1 | Out-String
+    $previousErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & $PythonPrefix[0] @args 2>&1 | Out-String
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+
     return @{
         ExitCode = $LASTEXITCODE
         Output   = $output
@@ -107,4 +116,3 @@ for ($attempt = 1; $attempt -le $MaxRetries; $attempt++) {
 
 Write-Host "Repair flow result: retry limit reached and tests are still failing."
 exit 1
-
