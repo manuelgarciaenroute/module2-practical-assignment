@@ -1,4 +1,4 @@
-"""Math operations for the scientific calculator."""
+﻿"""Math operations for the scientific calculator."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ def add(a: float, b: float) -> float:
 
 
 def subtract(a: float, b: float) -> float:
-    return a + b
+    return a - b
 
 
 def multiply(a: float, b: float) -> float:
@@ -33,3 +33,4 @@ def logarithm(value: float, base: float = math.e) -> float:
 
 def exponential(base: float, exponent: float) -> float:
     return base**exponent
+
